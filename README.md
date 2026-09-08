@@ -1,29 +1,61 @@
-# General Go template repository
+# selfupdate-cosign
 
-This is a general template repository containing some basic files every GitHub repo owned by Giant Swarm should have.
+[![Go Reference](https://pkg.go.dev/badge/github.com/giantswarm/selfupdate-cosign.svg)](https://pkg.go.dev/github.com/giantswarm/selfupdate-cosign)
 
-Note also these more specific repositories:
+A [`go-selfupdate`](https://github.com/creativeprojects/go-selfupdate) `Validator` that lets a Giant Swarm
+command-line tool refuse to install a release binary its own CircleCI pipeline did not build.
 
-- [template-app](https://github.com/giantswarm/template-app)
-- [gitops-template](https://github.com/giantswarm/gitops-template)
-- [python-app-template](https://github.com/giantswarm/python-app-template)
+## What it checks
 
-## Creating a new repository
+The [architect orb](https://github.com/giantswarm/architect-orb) signs every binary a public Giant Swarm
+repository releases with cosign, keyless, and publishes the signature next to the binary as a
+[Sigstore bundle](https://docs.sigstore.dev/about/bundle/) named `<binary>-<os>-<arch>.bundle`.
+`selfupdatecosign.New("giantswarm/<repo>")` plugs that into `go-selfupdate`:
 
-Please do not use the `Use this template` function in the GitHub web UI.
+- `DetectLatest` looks the `.bundle` asset up; a release without one fails with
+  `selfupdate.ErrValidationAssetNotFound` and is never downloaded.
+- `UpdateTo` hands the downloaded bytes and the bundle to the validator before anything is written.
+  The bundle must verify against the Sigstore public-good trust root (fetched through TUF, cached under
+  `~/.sigstore/root`), carry a transparency-log entry and a timestamp, and its certificate must name
+  - the issuer `https://oidc.circleci.com`,
+  - a subject of the shape `https://circleci.com/api/v2/projects/<uuid>/pipeline-definitions/<uuid>`, and
+  - the source repository `github.com/giantswarm/<repo>` (Fulcio extension `1.3.6.1.4.1.57264.1.12`),
+    which is what ties a bundle to one repository: the subject alone only says that some CircleCI pipeline signed.
 
-Check out the according [handbook article](https://handbook.giantswarm.io/docs/dev-and-releng/repository/go/) for better instructions.
+Anything else is an error, and `go-selfupdate` leaves the installed binary untouched.
 
-### Some suggestions for your README
+## Usage
 
-After you have created your new repository, you may want to add some of these badges to the top of your README.
+```go
+import (
+	"github.com/creativeprojects/go-selfupdate"
+	selfupdatecosign "github.com/giantswarm/selfupdate-cosign"
+)
 
-- **CircleCI:** After enabling builds for this repo via [this link](https://circleci.com/setup-project/gh/giantswarm/REPOSITORY_NAME), you can find badge code on [this page](https://app.circleci.com/settings/project/github/giantswarm/REPOSITORY_NAME/status-badges).
+updater, err := selfupdate.NewUpdater(selfupdate.Config{
+	Validator: selfupdatecosign.New("giantswarm/muster"),
+})
+```
 
-- **Go reference:** use [this helper](https://pkg.go.dev/badge/) to create the markdown code.
+Then use `DetectLatest` and `UpdateTo` as usual. Map `selfupdate.ErrValidationAssetNotFound` to a message that
+says the release has no signature bundle, and say in the `UpdateTo` error that the binary on disk is unchanged.
 
-- **Go report card:** enter the module name on the [front page](https://goreportcard.com/) and hit "Generate report". Then use this markdown code for your badge: `[![Go report card](https://goreportcard.com/badge/github.com/giantswarm/REPOSITORY_NAME)](https://goreportcard.com/report/github.com/giantswarm/REPOSITORY_NAME)`
+Tests and air-gapped environments can pin their own snapshot of the trust root with
+`selfupdatecosign.WithTrustedMaterial(material)`.
 
-- **OpenSSF Scorecard Report:** for public repos only: `[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/giantswarm/{APP-NAME}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/giantswarm/{APP-NAME})`
+## Verifying a bundle by hand
 
-- **Sourcegraph "used by N projects" badge**: for public Go repos only: `[![Sourcegraph](https://sourcegraph.com/github.com/giantswarm/REPOSITORY_NAME/-/badge.svg)](https://sourcegraph.com/github.com/giantswarm/REPOSITORY_NAME)`
+```sh
+cosign verify-blob --bundle muster-linux-amd64.bundle \
+  --certificate-oidc-issuer-regexp '^https://oidc\.circleci\.com' \
+  --certificate-identity-regexp '^https://circleci\.com/api/v2/projects/[a-f0-9-]+/pipeline-definitions/[a-f0-9-]+$' \
+  muster-linux-amd64
+```
+
+The bundles are cosign v3 bundles (`application/vnd.dev.sigstore.bundle.v0.3+json`); cosign v2 cannot read them.
+
+## Tests
+
+`go test ./...` verifies a real published bundle (muster v5.13.0, `testdata/`) against a snapshot of the trust
+root, offline. `SELFUPDATE_COSIGN_LIVE=1 go test ./...` additionally downloads a release binary and verifies it
+against the live trust root.

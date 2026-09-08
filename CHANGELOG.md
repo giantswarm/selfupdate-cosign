@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `selfupdatecosign.New`: a go-selfupdate `Validator` that installs a release binary only after its cosign Sigstore bundle verifies for a CircleCI build of the given repository.
 
 
-[Unreleased]: https://github.com/giantswarm/REPOSITORY_NAME/tree/main
+
+[Unreleased]: https://github.com/giantswarm/selfupdate-cosign/tree/main
