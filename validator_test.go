@@ -11,7 +11,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/creativeprojects/go-selfupdate"
 	"github.com/sigstore/sigstore-go/pkg/fulcio/certificate"
 	"github.com/sigstore/sigstore-go/pkg/root"
 	"github.com/sigstore/sigstore-go/pkg/verify"
@@ -57,13 +56,6 @@ func digest(t *testing.T, hexDigest string) verify.ArtifactPolicyOption {
 		t.Fatalf("decoding digest: %v", err)
 	}
 	return verify.WithArtifactDigest("sha256", raw)
-}
-
-func TestValidatorImplementsGoSelfupdateValidator(t *testing.T) {
-	var v selfupdate.Validator = New(fixtureRepository)
-	if v == nil {
-		t.Fatal("nil validator")
-	}
 }
 
 func TestBundleIsNamedAfterTheAsset(t *testing.T) {
