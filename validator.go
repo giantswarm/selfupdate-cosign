@@ -90,6 +90,17 @@ var _ selfupdate.Validator = (*Validator)(nil)
 // Option configures a Validator.
 type Option func(*Validator)
 
+// WithIdentity replaces the certificate identity a bundle must carry. New
+// pins a Giant Swarm CircleCI build of the repository; a tool whose releases
+// another pipeline signs, a GitHub Actions workflow for instance, passes the
+// identity its bundles carry instead. Pin the source repository extension as
+// Identity does, or a signature by any build of that pipeline is accepted.
+func WithIdentity(identity verify.CertificateIdentity) Option {
+	return func(v *Validator) {
+		v.identity = identity
+	}
+}
+
 // WithTrustedMaterial verifies against the given material instead of the
 // Sigstore public-good trust root fetched through TUF. For tests, and for
 // environments that pin their own snapshot of the trust root.
@@ -126,8 +137,8 @@ func (v *Validator) GetValidationAssetName(assetName string) string {
 }
 
 // Validate returns nil when validation is a Sigstore bundle whose signature
-// covers release, made under the identity of a CircleCI build of the
-// validator's repository, recorded in a transparency log and timestamped; any
+// covers release, made under the validator's identity (by default a CircleCI
+// build of its repository), recorded in a transparency log and timestamped; any
 // other input is an error, and go-selfupdate leaves the installed binary
 // untouched.
 func (v *Validator) Validate(assetName string, release, validation []byte) error {
@@ -155,7 +166,7 @@ func (v *Validator) verify(assetName string, artifact verify.ArtifactPolicyOptio
 	}
 	policy := verify.NewPolicy(artifact, verify.WithCertificateIdentity(v.identity))
 	if _, err := verifier.Verify(&b, policy); err != nil {
-		return fmt.Errorf("%s does not verify against %s%s as a CircleCI build of %s: %w",
+		return fmt.Errorf("%s does not verify against %s%s as a release build of %s: %w",
 			assetName, assetName, BundleSuffix, v.repository, err)
 	}
 	return nil
