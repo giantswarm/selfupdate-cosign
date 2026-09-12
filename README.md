@@ -43,6 +43,24 @@ says the release has no signature bundle, and say in the `UpdateTo` error that t
 Tests and air-gapped environments can pin their own snapshot of the trust root with
 `selfupdatecosign.WithTrustedMaterial(material)`.
 
+## Other signers
+
+`New` pins the identity of a Giant Swarm CircleCI build. A tool whose releases another pipeline signs passes
+the identity its bundles carry with `WithIdentity`; for a GitHub Actions release workflow that is the
+workflow's `job_workflow_ref` as the subject, GitHub's OIDC issuer, and the source repository Fulcio records:
+
+```go
+Validator: selfupdatecosign.New("owner/tool", selfupdatecosign.WithIdentity(verify.CertificateIdentity{
+	SubjectAlternativeName: verify.SubjectAlternativeNameMatcher{
+		SubjectAlternativeName: "https://github.com/owner/tool/.github/workflows/release.yml@refs/heads/main",
+	},
+	Issuer:     verify.IssuerMatcher{Issuer: "https://token.actions.githubusercontent.com"},
+	Extensions: certificate.Extensions{SourceRepositoryURI: "https://github.com/owner/tool"},
+})),
+```
+
+Keep the source repository pinned: the subject alone says which workflow signed, not which repository it built.
+
 ## Verifying a bundle by hand
 
 ```sh

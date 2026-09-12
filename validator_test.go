@@ -168,6 +168,33 @@ func TestIdentityPinsIssuerSubjectAndRepository(t *testing.T) {
 	}
 }
 
+func TestWithIdentityDecidesWhoMayHaveSigned(t *testing.T) {
+	// The genuine CircleCI bundle, checked as a GitHub Actions build of the
+	// same repository: the option replaces the pin, so it is refused.
+	actions := verify.CertificateIdentity{
+		SubjectAlternativeName: verify.SubjectAlternativeNameMatcher{
+			SubjectAlternativeName: "https://github.com/giantswarm/muster/.github/workflows/release.yml@refs/heads/main",
+		},
+		Issuer:     verify.IssuerMatcher{Issuer: "https://token.actions.githubusercontent.com"},
+		Extensions: certificate.Extensions{SourceRepositoryURI: "https://github.com/giantswarm/muster"},
+	}
+	v := New(fixtureRepository, WithTrustedMaterial(snapshot(t)), WithIdentity(actions))
+	err := v.verify(fixtureAsset, digest(t, fixtureDigestHex), read(t, fixtureBundle))
+	if err == nil {
+		t.Fatal("a CircleCI bundle must not verify as a GitHub Actions build")
+	}
+	if !strings.Contains(err.Error(), fixtureRepository) {
+		t.Errorf("the error should still name the repository: %v", err)
+	}
+	t.Logf("refused: %v", err)
+
+	// The default identity, passed explicitly, verifies as before.
+	v = New(fixtureRepository, WithTrustedMaterial(snapshot(t)), WithIdentity(Identity(fixtureRepository)))
+	if err := v.verify(fixtureAsset, digest(t, fixtureDigestHex), read(t, fixtureBundle)); err != nil {
+		t.Fatalf("the CircleCI identity passed through WithIdentity must verify the published bundle: %v", err)
+	}
+}
+
 // TestLivePublishedAssetVerifiesWithThePublicTrustRoot downloads a real
 // release binary and its bundle from GitHub and verifies them the way a CLI
 // does in production: through Validate, against the trust root fetched via
