@@ -37,8 +37,24 @@ updater, err := selfupdate.NewUpdater(selfupdate.Config{
 })
 ```
 
-Then use `DetectLatest` and `UpdateTo` as usual. Map `selfupdate.ErrValidationAssetNotFound` to a message that
-says the release has no signature bundle, and say in the `UpdateTo` error that the binary on disk is unchanged.
+Then find the release with `DetectLatest` and install it with `Install` in place of `UpdateTo`:
+
+```go
+exe, err := selfupdate.ExecutablePath()
+// …
+err = selfupdatecosign.Install(ctx, updater, release, exe)
+```
+
+`Install` downloads and verifies the way `UpdateTo` does, then puts the binary in place with a single rename.
+`UpdateTo` swaps through `.<name>.new` and `.<name>.old` next to the binary: between its two renames there is no
+binary, and two updates at once (every shell on a machine told to update after a release) share those names, so one
+can truncate the other's download or remove the binary outright. With `Install`, a process that starts the binary
+meanwhile runs the old or the new one, any number of updates can run at once, and nothing but `Install`'s own
+staging directory is removed. A symbolic link keeps pointing at the binary, which keeps its mode. On Windows, where
+a running executable can be moved aside but not replaced, `Install` is `UpdateTo`.
+
+Map `selfupdate.ErrValidationAssetNotFound` to a message that says the release has no signature bundle, and say in
+the `Install` error that the binary on disk is unchanged.
 
 Tests and air-gapped environments can pin their own snapshot of the trust root with
 `selfupdatecosign.WithTrustedMaterial(material)`.
