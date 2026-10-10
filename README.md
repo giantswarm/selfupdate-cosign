@@ -77,6 +77,23 @@ Validator: selfupdatecosign.New("owner/tool", selfupdatecosign.WithIdentity(veri
 
 Keep the source repository pinned: the subject alone says which workflow signed, not which repository it built.
 
+## The go-selfupdate line
+
+go-selfupdate v1.6.0 imports `golang.org/x/crypto/openpgp` for its PGP validator, which no Giant Swarm CLI uses, and
+`govulncheck` reports GO-2026-5932 (unmaintained, no fixed version) in every binary that embeds it. Until an upstream
+release carries the fix ([creativeprojects/go-selfupdate#58](https://github.com/creativeprojects/go-selfupdate/pull/58)),
+this module takes go-selfupdate from Giant Swarm's line, upstream v1.6.0 plus that one patch:
+
+```
+replace github.com/creativeprojects/go-selfupdate v1.6.0 => github.com/giantswarm/go-selfupdate v1.6.1-0.<date>-<commit>
+```
+
+A `replace` applies to the main module only, so a CLI adds the same line to its own `go.mod`; the current commit is the
+one in this module's `go.mod`, and the line's
+[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves. Without the line a
+CLI builds and verifies as before, and its `govulncheck` keeps reporting the advisory. `make govulncheck`, part of
+`make test` and so of CI, keeps this module's own reachable graph clean.
+
 ## Verifying a bundle by hand
 
 ```sh

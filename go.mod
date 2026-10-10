@@ -11,10 +11,12 @@ require (
 	code.gitea.io/sdk/gitea v0.23.2 // indirect
 	github.com/42wim/httpsig v1.2.4 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
+	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/digitorus/pkcs7 v0.0.0-20230818184609-3a137a874352 // indirect
@@ -106,3 +108,12 @@ replace go.opentelemetry.io/otel v1.44.0 => go.opentelemetry.io/otel v1.46.0
 replace go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0 => go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0
 
 replace go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.34.0 => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0
+
+// The Giant Swarm line of go-selfupdate: upstream v1.6.0 plus the patch of
+// creativeprojects/go-selfupdate#58 (ProtonMail/go-crypto/openpgp in place
+// of the unmaintained x/crypto/openpgp), which keeps GO-2026-5932 out of the
+// module's reachable graph (giantswarm/go-selfupdate FORK.md). Pinned to
+// v1.6.0 only, so a bump of go-selfupdate leaves the line and govulncheck
+// shows whether upstream carries the patch. A replace reaches the main module
+// only: a CLI that embeds this module adds the same line to its own go.mod.
+replace github.com/creativeprojects/go-selfupdate v1.6.0 => github.com/giantswarm/go-selfupdate v1.6.1-0.20261010124654-6140e1a08030
