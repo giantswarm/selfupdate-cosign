@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- go-selfupdate comes from the Giant Swarm line `github.com/giantswarm/go-selfupdate` (upstream v1.6.0 plus the patch of creativeprojects/go-selfupdate#58: `github.com/ProtonMail/go-crypto/openpgp` in place of the unmaintained `golang.org/x/crypto/openpgp`) through a `replace`, so `govulncheck ./...` no longer reports GO-2026-5932 here. A `replace` reaches the main module only: a CLI adds the same line to its own `go.mod` (README, "The go-selfupdate line").
+
 ### Added
+
+- `make govulncheck`, chained into `make test` and so into CI: a vulnerability reachable from the library's code fails the build here before a CLI inherits it.
 
 - `selfupdatecosign.Install`: `UpdateTo` with a single rename. The binary stays complete while it is replaced, and any number of updates of it can run at once; go-selfupdate's own swap leaves no binary between its two renames, and concurrent updates can remove it.
 
