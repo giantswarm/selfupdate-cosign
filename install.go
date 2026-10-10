@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/creativeprojects/go-selfupdate"
+	"github.com/giantswarm/go-selfupdate"
 )
 
 // Install writes release over the executable at path the way
