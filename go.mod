@@ -3,7 +3,7 @@ module github.com/giantswarm/selfupdate-cosign
 go 1.26.0
 
 require (
-	github.com/creativeprojects/go-selfupdate v1.6.0
+	github.com/giantswarm/go-selfupdate v1.6.1
 	github.com/sigstore/sigstore-go v1.3.0
 )
 
@@ -108,12 +108,3 @@ replace go.opentelemetry.io/otel v1.44.0 => go.opentelemetry.io/otel v1.46.0
 replace go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0 => go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0
 
 replace go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.34.0 => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0
-
-// The Giant Swarm line of go-selfupdate: upstream v1.6.0 plus the patch of
-// creativeprojects/go-selfupdate#58 (ProtonMail/go-crypto/openpgp in place
-// of the unmaintained x/crypto/openpgp), which keeps GO-2026-5932 out of the
-// module's reachable graph (giantswarm/go-selfupdate FORK.md). Pinned to
-// v1.6.0 only, so a bump of go-selfupdate leaves the line and govulncheck
-// shows whether upstream carries the patch. A replace reaches the main module
-// only: a CLI that embeds this module adds the same line to its own go.mod.
-replace github.com/creativeprojects/go-selfupdate v1.6.0 => github.com/giantswarm/go-selfupdate v1.6.1-0.20261010124654-6140e1a08030

@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/giantswarm/selfupdate-cosign.svg)](https://pkg.go.dev/github.com/giantswarm/selfupdate-cosign)
 
-A [`go-selfupdate`](https://github.com/creativeprojects/go-selfupdate) `Validator` that lets a Giant Swarm
+A [`go-selfupdate`](https://github.com/giantswarm/go-selfupdate) `Validator` that lets a Giant Swarm
 command-line tool refuse to install a release binary its own CircleCI pipeline did not build.
 
 ## What it checks
@@ -28,7 +28,7 @@ Anything else is an error, and `go-selfupdate` leaves the installed binary untou
 
 ```go
 import (
-	"github.com/creativeprojects/go-selfupdate"
+	"github.com/giantswarm/go-selfupdate"
 	selfupdatecosign "github.com/giantswarm/selfupdate-cosign"
 )
 
@@ -82,17 +82,12 @@ Keep the source repository pinned: the subject alone says which workflow signed,
 go-selfupdate v1.6.0 imports `golang.org/x/crypto/openpgp` for its PGP validator, which no Giant Swarm CLI uses, and
 `govulncheck` reports GO-2026-5932 (unmaintained, no fixed version) in every binary that embeds it. Until an upstream
 release carries the fix ([creativeprojects/go-selfupdate#58](https://github.com/creativeprojects/go-selfupdate/pull/58)),
-this module takes go-selfupdate from Giant Swarm's line, upstream v1.6.0 plus that one patch:
-
-```
-replace github.com/creativeprojects/go-selfupdate v1.6.0 => github.com/giantswarm/go-selfupdate v1.6.1-0.<date>-<commit>
-```
-
-A `replace` applies to the main module only, so a CLI adds the same line to its own `go.mod`; the current commit is the
-one in this module's `go.mod`, and the line's
-[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves. Without the line a
-CLI builds and verifies as before, and its `govulncheck` keeps reporting the advisory. `make govulncheck`, part of
-`make test` and so of CI, keeps this module's own reachable graph clean.
+this module imports Giant Swarm's line of go-selfupdate under its own module path, `github.com/giantswarm/go-selfupdate`
+(upstream v1.6.0 plus that one patch). A CLI imports the same path for `selfupdate.NewUpdater` and the other
+go-selfupdate API, since `Install` takes the line's `*selfupdate.Updater`, and needs no `replace`: the line reaches it
+through this module's `require`, `go install …@latest` included. The line's
+[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves. `make govulncheck`,
+part of `make test` and so of CI, keeps this module's own reachable graph clean.
 
 ## Verifying a bundle by hand
 

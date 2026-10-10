@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/creativeprojects/go-selfupdate"
+	"github.com/giantswarm/go-selfupdate"
 )
 
 // The release the fake GitHub lists: this platform's binary and its bundle.

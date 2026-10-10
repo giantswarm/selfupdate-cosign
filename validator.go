@@ -6,7 +6,7 @@
 // short-lived certificate from Fulcio, the signature is recorded in the Rekor
 // transparency log and timestamped, and everything a verifier needs travels in
 // a Sigstore bundle published next to the binary as <asset>.bundle. Validator
-// plugs that check into github.com/creativeprojects/go-selfupdate: DetectLatest
+// plugs that check into github.com/giantswarm/go-selfupdate: DetectLatest
 // looks the bundle up (a release without one is reported with
 // selfupdate.ErrValidationAssetNotFound and never downloaded), UpdateTo hands
 // the downloaded bytes and the bundle to Validate, and only a verified binary
@@ -25,7 +25,7 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/creativeprojects/go-selfupdate"
+	"github.com/giantswarm/go-selfupdate"
 	"github.com/sigstore/sigstore-go/pkg/bundle"
 	"github.com/sigstore/sigstore-go/pkg/fulcio/certificate"
 	"github.com/sigstore/sigstore-go/pkg/root"

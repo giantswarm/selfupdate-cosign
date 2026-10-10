@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- go-selfupdate comes from the Giant Swarm line `github.com/giantswarm/go-selfupdate` (upstream v1.6.0 plus the patch of creativeprojects/go-selfupdate#58: `github.com/ProtonMail/go-crypto/openpgp` in place of the unmaintained `golang.org/x/crypto/openpgp`) through a `replace`, so `govulncheck ./...` no longer reports GO-2026-5932 here. A `replace` reaches the main module only: a CLI adds the same line to its own `go.mod` (README, "The go-selfupdate line").
+- go-selfupdate is imported from the Giant Swarm line under its own module path, `github.com/giantswarm/go-selfupdate` v1.6.1 (upstream v1.6.0 plus the patch of creativeprojects/go-selfupdate#58: `github.com/ProtonMail/go-crypto/openpgp` in place of the unmaintained `golang.org/x/crypto/openpgp`), with no `replace`, so GO-2026-5932 is out of the reachable graph of this module and of every CLI that takes it. A CLI switches its own go-selfupdate import to `github.com/giantswarm/go-selfupdate` with the bump: `Install` takes the line's `*selfupdate.Updater`.
 
 ### Added
 
