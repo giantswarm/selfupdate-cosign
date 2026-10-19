@@ -3,7 +3,7 @@ module github.com/giantswarm/selfupdate-cosign
 go 1.26.0
 
 require (
-	github.com/giantswarm/go-selfupdate v1.6.4
+	github.com/giantswarm/go-selfupdate v1.6.5
 	github.com/sigstore/sigstore-go v1.3.0
 )
 
