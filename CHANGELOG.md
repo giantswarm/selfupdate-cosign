@@ -15,8 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `make govulncheck`, chained into `make test` and so into CI: a vulnerability reachable from the library's code fails the build here before a CLI inherits it.
-
 - `selfupdatecosign.Install`: `UpdateTo` with a single rename. The binary stays complete while it is replaced, and any number of updates of it can run at once; go-selfupdate's own swap leaves no binary between its two renames, and concurrent updates can remove it.
 
 - `selfupdatecosign.WithIdentity`: pin a different certificate identity, for releases a pipeline other than Giant Swarm's CircleCI signs (a GitHub Actions workflow, for instance).
