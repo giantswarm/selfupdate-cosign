@@ -86,8 +86,7 @@ this module imports Giant Swarm's line of go-selfupdate under its own module pat
 (upstream v1.6.0 plus that one patch). A CLI imports the same path for `selfupdate.NewUpdater` and the other
 go-selfupdate API, since `Install` takes the line's `*selfupdate.Updater`, and needs no `replace`: the line reaches it
 through this module's `require`, `go install …@latest` included. The line's
-[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves. `make govulncheck`,
-part of `make test` and so of CI, keeps this module's own reachable graph clean.
+[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves.
 
 ## Verifying a bundle by hand
 
