@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.27.3
 
 require (
-	github.com/giantswarm/go-selfupdate v1.6.6
+	github.com/giantswarm/go-selfupdate v1.6.7
 	github.com/sigstore/sigstore-go v1.3.0
 )
 
