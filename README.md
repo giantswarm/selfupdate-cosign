@@ -79,14 +79,16 @@ Keep the source repository pinned: the subject alone says which workflow signed,
 
 ## The go-selfupdate line
 
-go-selfupdate v1.6.0 imports `golang.org/x/crypto/openpgp` for its PGP validator, which no Giant Swarm CLI uses, and
-`govulncheck` reports GO-2026-5932 (unmaintained, no fixed version) in every binary that embeds it. Until an upstream
-release carries the fix ([creativeprojects/go-selfupdate#58](https://github.com/creativeprojects/go-selfupdate/pull/58)),
-this module imports Giant Swarm's line of go-selfupdate under its own module path, `github.com/giantswarm/go-selfupdate`
-(upstream v1.6.0 plus that one patch). A CLI imports the same path for `selfupdate.NewUpdater` and the other
-go-selfupdate API, since `Install` takes the line's `*selfupdate.Updater`, and needs no `replace`: the line reaches it
-through this module's `require`, `go install …@latest` included. The line's
-[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) says how it moves.
+This module imports Giant Swarm's line of go-selfupdate under its own module path, `github.com/giantswarm/go-selfupdate`:
+an upstream release plus the fixes the CLIs need before upstream ships them. It carries a fix for GitHub's
+intermittently empty release list: GitHub sometimes answers the release list with `200` and an empty array, upstream's
+v1 `DetectLatest` then finds no release and the CLI refuses to update, while the line asks again and also asks GitHub
+for the latest release directly. A CLI imports the same path for `selfupdate.NewUpdater` and the other go-selfupdate
+API, since `Install` takes the line's `*selfupdate.Updater`, and needs no `replace`: the line reaches it through this
+module's `require`, `go install …@latest` included. The line's
+[FORK.md](https://github.com/giantswarm/go-selfupdate/blob/giantswarm/FORK.md) names the upstream release it is pinned
+to and every change it carries, and says how it moves; at the first upstream release that contains them all, the import
+goes back to upstream's path.
 
 ## Verifying a bundle by hand
 
